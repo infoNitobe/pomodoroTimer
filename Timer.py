@@ -4,9 +4,20 @@ import threading
 import State
 import tkinter as tk
 from pomodoroTimer import Application
+from pomodoroTimer import ConfirmationDialog
 from Sound import Sound
 
 class Timer:
+    @property
+    def forcusValNow(self):
+        return self._forcusValNow
+    @property
+    def shortRestValNow(self):
+        return self._shortRestSetting
+    @property
+    def longRestValNow(self):
+        return self._longRestSetting
+
     def __init__(self):
         self._threadFinFlag = False
         self._forcusValNow = 0
@@ -23,30 +34,27 @@ class Timer:
         #protocol handler
         self.root.protocol("WM_DELETE_WINDOW", self.eventClose)
 
-
         #この後に処理を書かないこと
         self.app.mainloop()
-
-    def eventClose(self):
-        self._event.set()
-        self._t.join()
-        print("close Now")
-        self.root.destroy()
 
     def _set_values(self):
         self._forcusSetting = int(self.app.enSetFocus.get())
         self._shortRestSetting = int(self.app.enSetRestShort.get())
         self._longRestSetting = int(self.app.enSetRestLong.get())
 
-    @property
-    def forcusValNow(self):
-        return self._forcusValNow
-    @property
-    def shortRestValNow(self):
-        return self._shortRestSetting
-    @property
-    def longRestValNow(self):
-        return self._longRestSetting
+    def _processTransitionChk(self):
+        if self.app.chkVal.get() == False:
+            self.app.makeDialog()
+            dialog = self.app.newDialog
+            dialog.transitionFlag = True
+            while dialog.transitionFlag == True:
+                time.sleep(1)
+
+    def eventClose(self):
+        self._event.set()
+        self._t.join()
+        print("close Now")
+        self.root.destroy()
 
     def updateTimer(self):
         # while not self._threadFinFlag:
@@ -67,7 +75,6 @@ class Timer:
                     self._forcusValNow = self._longRestSetting
                 #一度のみ、設定→特定条件への変化を検出させるため。
                 self.st.forceSetOldState(self.st.nowState)
-
 
             if self.st._nowState == self.st.STATE_FORCUS:
                 #表示初期化
@@ -97,6 +104,8 @@ class Timer:
                         self._shortRestValNow = self._shortRestSetting
                     elif self.st.nowState == self.st.STATE_LONG_REST:
                         self._longRestValNow = self._longRestSetting
+                    
+                    self._processTransitionChk()
 
             elif self.st.nowState == self.st.STATE_SHORT_REST:
                 #表示初期化
@@ -122,6 +131,8 @@ class Timer:
                 
                     #次の状態のタイマーの値を初期化
                     self._forcusValNow = self._forcusSetting
+                    
+                    self._processTransitionChk()
 
             elif self.st.nowState == self.st.STATE_LONG_REST:
                 #表示初期化
@@ -147,6 +158,8 @@ class Timer:
                 
                     #次の状態のタイマーの値を初期化
                     self._longRestValNow = self._longRestSetting
+                    
+                    self._processTransitionChk()
 
             time.sleep(1)
 a = Timer()
