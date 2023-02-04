@@ -6,15 +6,8 @@ import tkinter as tk
 from pomodoroTimer import Application
 
 class Timer:
-    FORCUS_DEFALT_VAL = 3
-    SHORT_REST_DEFALT_VAL = 1
-    LONG_REST_DEFALT_VAL = 2
     def __init__(self):
         self._threadFinFlag = False
-        self._forcusSetting = self.FORCUS_DEFALT_VAL
-        self._shortRestSetting = self.SHORT_REST_DEFALT_VAL
-        self._longRestSetting = self.LONG_REST_DEFALT_VAL
-
         self._forcusValNow = 0
         self._shortRestValNow = 0
         self._longRestValNow = 0
@@ -29,8 +22,20 @@ class Timer:
         #protocol handler
         self.root.protocol("WM_DELETE_WINDOW", self.eventClose)
 
+
         #この後に処理を書かないこと
         self.app.mainloop()
+
+    def eventClose(self):
+        self._event.set()
+        self._t.join()
+        print("close Now")
+        self.root.destroy()
+
+    def _set_values(self):
+        self._forcusSetting = int(self.app.enSetFocus.get())
+        self._shortRestSetting = int(self.app.enSetRestShort.get())
+        self._longRestSetting = int(self.app.enSetRestLong.get())
 
     @property
     def forcusValNow(self):
@@ -42,14 +47,6 @@ class Timer:
     def longRestValNow(self):
         return self._longRestSetting
 
-    def eventClose(self):
-        self._event.set()
-        self._t.join()
-        print("close Now")
-        self.root.destroy()
-
-#todo:
-#   途中で設定できるようにする。
     def updateTimer(self):
         # while not self._threadFinFlag:
         while not self._event.wait(0):
@@ -58,6 +55,9 @@ class Timer:
 
             #設定状態から遷移時のタイマー値設定
             if self.st.oldState == self.st.STATE_SETTING:
+                #設定
+                self._set_values()
+
                 if self.st.nowState == self.st.STATE_FORCUS:
                     self._forcusValNow = self._forcusSetting
                 elif self.st.nowState == self.st.STATE_SHORT_REST:
