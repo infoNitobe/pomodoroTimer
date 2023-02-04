@@ -32,6 +32,10 @@ class Application(tk.Frame):
 		self.btLongRest["text"] = "長 休憩"
 		self.btLongRest["command"] = self.print_txtval
 		self.btLongRest.grid(row = 0, column = 3)
+		#チェックボタン：画面遷移
+		self.chkVal = tk.BooleanVar(self)
+		self.chkB = tk.Checkbutton(self, variable=self.chkVal, text="画面遷移")
+		self.chkB.grid(row = 0, column = 4)
 
 		#line2
 		#label
@@ -73,6 +77,28 @@ class Application(tk.Frame):
 	def print_txtval(self):
 		val_en = self.en.get()
 		print(val_en)
-# root = tk.Tk()
-# app = Application(master = root)
-# app.mainloop()
+	
+	def makeDialog(self):
+		self.newWindow = tk.Toplevel(self.master)
+		self.newDialog = ConfirmationDialog(self.newWindow)
+
+class ConfirmationDialog(tk.Frame):
+	transitionFlag = False
+	def __init__( self, master = None):
+		super().__init__(master)
+		self.pack()
+		self.master.title("confirmation dialog")
+		self.master.geometry("150x150")
+		self.create_widgets()
+	
+	def _clearTransitionFlag(self):
+		self.transitionFlag = False
+		self.master.destroy()
+
+	# 部品 の 作成/ 設定
+	def create_widgets(self):
+		self.bt = tk.Button(self)
+		self.bt["text"] = "OK"
+		self.bt["command"] = self._clearTransitionFlag
+		self.bt.pack()
+	
