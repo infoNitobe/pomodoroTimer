@@ -25,12 +25,12 @@ class Application(tk.Frame):
 		#短　休憩
 		self.btShortRest = tk.Button(self)
 		self.btShortRest["text"] = "短 休憩"
-		self.btShortRest["command"] = self.print_txtval
+		self.btShortRest["command"] = self.toShortRest
 		self.btShortRest.grid(row = 0, column = 2)
 		#長　休憩
 		self.btLongRest = tk.Button(self)
 		self.btLongRest["text"] = "長 休憩"
-		self.btLongRest["command"] = self.print_txtval
+		self.btLongRest["command"] = self.toLongRest
 		self.btLongRest.grid(row = 0, column = 3)
 		#チェックボタン：画面遷移
 		self.chkVal = tk.BooleanVar(self)
@@ -74,10 +74,14 @@ class Application(tk.Frame):
 		self._state.updateState(State.State.STATE_FORCUS)
 		print("FOCUS")
 
-	def print_txtval(self):
-		val_en = self.en.get()
-		print(val_en)
+	def toShortRest(self):
+		self._state.updateState(State.State.STATE_SHORT_REST)
+		print("SHORT_REST")
 	
+	def toLongRest(self):
+		self._state.updateState(State.State.STATE_LONG_REST)
+		print("LONG_REST")
+
 	def makeDialog(self):
 		self.newWindow = tk.Toplevel(self.master)
 		self.newDialog = ConfirmationDialog(self.newWindow)

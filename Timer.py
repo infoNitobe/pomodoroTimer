@@ -70,9 +70,9 @@ class Timer:
                 if self.st.nowState == self.st.STATE_FORCUS:
                     self._forcusValNow = self._forcusSetting
                 elif self.st.nowState == self.st.STATE_SHORT_REST:
-                    self._forcusValNow = self._shortRestSetting
+                    self._shortRestValNow = self._shortRestSetting
                 elif self.st.nowState == self.st.STATE_LONG_REST:
-                    self._forcusValNow = self._longRestSetting
+                    self._longRestValNow = self._longRestSetting
                 #一度のみ、設定→特定条件への変化を検出させるため。
                 self.st.forceSetOldState(self.st.nowState)
 
@@ -157,7 +157,7 @@ class Timer:
                     self.st.updateState(None)
                 
                     #次の状態のタイマーの値を初期化
-                    self._longRestValNow = self._longRestSetting
+                    self._forcusValNow = self._forcusSetting
                     
                     self._processTransitionChk()
 
