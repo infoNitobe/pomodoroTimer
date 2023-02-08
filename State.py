@@ -7,8 +7,8 @@ class State:
     def __init__(self):
         self._nowState = self.STATE_SETTING
         self._oldState = ""
-        self._numShortRestSetting = 3
-        self._numShortRestNow = 3
+        self._numShortRestSetting = 2
+        self._numShortRestNow = 2
     
     @property
     def nowState(self):
@@ -24,7 +24,6 @@ class State:
             self._nowState = nowState
         elif self._nowState == self.STATE_FORCUS:
             if self._numShortRestNow > 0:
-                self._numShortRestNow -= 1
                 self._oldState = self._nowState
                 self._nowState = self.STATE_SHORT_REST
             else:
@@ -32,6 +31,7 @@ class State:
                 self._oldState = self._nowState
                 self._nowState = self.STATE_LONG_REST
         elif self._nowState == self.STATE_SHORT_REST:
+            self._numShortRestNow -= 1
             self._oldState = self._nowState
             self._nowState = self.STATE_FORCUS
         elif self._nowState == self.STATE_LONG_REST:
