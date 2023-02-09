@@ -70,6 +70,13 @@ class Application(tk.Frame):
 		self.enRestLong = tk.Entry(self)
 		self.enRestLong.grid(row = 2, column = 3)
 
+		#line4
+		#button
+		self.btSetting = tk.Button(self)
+		self.btSetting["text"] = "設定"
+		self.btSetting["command"] = self.toSetting
+		self.btSetting.grid(row=3, column=0)
+
 	def toFocus(self):
 		self._state.updateState(State.State.STATE_FORCUS)
 		print("FOCUS")
@@ -81,6 +88,10 @@ class Application(tk.Frame):
 	def toLongRest(self):
 		self._state.updateState(State.State.STATE_LONG_REST)
 		print("LONG_REST")
+	
+	def toSetting(self):
+		self._state.forceSetting()
+		print("SETTING")
 
 	def makeDialog(self):
 		self.newWindow = tk.Toplevel(self.master)

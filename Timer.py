@@ -25,14 +25,15 @@ class Timer:
         self._longRestValNow = 0
 
         self.st = State.State()
-        self._t = threading.Thread(target = self.updateTimer)
-        self._event = threading.Event()
-        self._t.start()
 
         self.root = tk.Tk()
         self.app = Application(master = self.root, state = self.st)
         #protocol handler
         self.root.protocol("WM_DELETE_WINDOW", self.eventClose)
+
+        self._t = threading.Thread(target = self.updateTimer)
+        self._event = threading.Event()
+        self._t.start()
 
         #この後に処理を書かないこと
         self.app.mainloop()
@@ -63,10 +64,10 @@ class Timer:
                 print("not setted: wait")
 
             #設定状態から遷移時のタイマー値設定
-            if self.st.oldState == self.st.STATE_SETTING:
+            if self.st.nowState == self.st.STATE_SETTING:
                 #設定
                 self._set_values()
-
+                '''
                 if self.st.nowState == self.st.STATE_FORCUS:
                     self._forcusValNow = self._forcusSetting
                 elif self.st.nowState == self.st.STATE_SHORT_REST:
@@ -75,8 +76,13 @@ class Timer:
                     self._longRestValNow = self._longRestSetting
                 #一度のみ、設定→特定条件への変化を検出させるため。
                 self.st.forceSetOldState(self.st.nowState)
-
-            if self.st._nowState == self.st.STATE_FORCUS:
+                '''
+            elif self.st._nowState == self.st.STATE_FORCUS:
+                #設定状態から遷移後の処理
+                if self.st.oldState == self.st.STATE_SETTING:
+                    self._forcusValNow = self._forcusSetting
+                    #一度のみ、設定→特定条件への変化を検出させるため。
+                    self.st.forceSetOldState(self.st.nowState)
                 #表示初期化
                 #HACK: enFocusにforcuSettingを表示させる処理はタイマー値更新と被る。可能なら修正。但し、単純にelifにするとforcusSettingに1を設定した時に上手くいかなくなる。
                 if self._forcusValNow == self._forcusSetting:
@@ -108,6 +114,11 @@ class Timer:
                     self._processTransitionChk()
 
             elif self.st.nowState == self.st.STATE_SHORT_REST:
+                #設定状態から遷移後の処理
+                if self.st.oldState == self.st.STATE_SETTING:
+                    self._shortRestValNow = self._shortRestSetting
+                    #一度のみ、設定→特定条件への変化を検出させるため。
+                    self.st.forceSetOldState(self.st.nowState)
                 #表示初期化
                 if self._shortRestValNow == self._shortRestSetting:
                     Sound.beep_short_rest()
@@ -135,6 +146,11 @@ class Timer:
                     self._processTransitionChk()
 
             elif self.st.nowState == self.st.STATE_LONG_REST:
+                #設定状態から遷移後の処理
+                if self.st.oldState == self.st.STATE_SETTING:
+                    self._longRestValNow = self._longRestSetting
+                    #一度のみ、設定→特定条件への変化を検出させるため。
+                    self.st.forceSetOldState(self.st.nowState)
                 #表示初期化
                 if self._longRestValNow == self._longRestSetting:
                     Sound.beep_long_rest()
