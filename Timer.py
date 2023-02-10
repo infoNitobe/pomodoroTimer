@@ -81,6 +81,13 @@ class Timer:
         entity.delete(0, "end")
         entity.insert(0, vals[0])
         vals[0] -= 1
+    
+    def _updateValAtTimeout(self, state):
+        vals = self._listNowVal[state]
+        entity = self._listEntity[state]
+        entity.delete(0, "end")
+        entity.insert(0, vals[0])
+        vals[0] = self._forcusSetting
 
     def updateTimer(self):
         # while not self._threadFinFlag:
@@ -108,11 +115,10 @@ class Timer:
                     self._updateNowVal(self.st._nowState)
                 #タイムアウトで状態更新
                 elif self._forcusValNow[0] == 1:
-                    self.app.enFocus.delete(0, "end")
-                    self.app.enFocus.insert(0, self._forcusValNow[0])
-                    self._forcusValNow[0] = self._forcusSetting
+                    self._updateValAtTimeout(self.st._nowState)
                     self.st.updateState(None)
                 
+                    #todo: 全ての状態のif文処理にする。今は、forcusが入っていない。
                     #次の状態のタイマーの値を初期化
                     if self.st.nowState == self.st.STATE_SHORT_REST:
                         self._shortRestValNow[0] = self._shortRestSetting
@@ -135,9 +141,7 @@ class Timer:
                     self._updateNowVal(self.st._nowState)
                 #タイムアウトで状態更新
                 elif self._shortRestValNow[0] == 1:
-                    self.app.enRestShort.delete(0, "end")
-                    self.app.enRestShort.insert(0, self._shortRestValNow[0])
-                    self._shortRestValNow[0] = self._shortRestSetting
+                    self._updateValAtTimeout(self.st._nowState)
                     self.st.updateState(None)
                 
                     #次の状態のタイマーの値を初期化
@@ -159,9 +163,7 @@ class Timer:
                     self._updateNowVal(self.st._nowState)
                 #タイムアウトで状態更新
                 elif self._longRestValNow[0] == 1:
-                    self.app.enRestLong.delete(0, "end")
-                    self.app.enRestLong.insert(0, self._longRestValNow[0])
-                    self._longRestValNow[0] = self._longRestSetting
+                    self._updateValAtTimeout(self.st._nowState)
                     self.st.updateState(None)
                 
                     #次の状態のタイマーの値を初期化
