@@ -58,12 +58,6 @@ class Timer:
             dialog.transitionFlag = True
             while dialog.transitionFlag == True:
                 time.sleep(1)
-
-    def eventClose(self):
-        self._event.set()
-        self._t.join()
-        print("close Now")
-        self.root.destroy()
     
     def _initDisplay(self, state):
         #sound
@@ -97,6 +91,34 @@ class Timer:
         vals = self._listNowVal[state]
         settings = self._listSetting[state]
         vals[0] = settings[0]
+    
+    def _manageTimerAndGui(self):
+        #設定状態から遷移後の処理
+        if self.st.oldState == self.st.STATE_SETTING:
+            self._listNowVal[self.st.nowState][0] = self._listSetting[self.st.nowState][0]
+            #一度のみ、設定→特定条件への変化を検出させるため。
+            self.st.forceSetOldState(self.st.nowState)
+        #表示初期化
+        if self._listNowVal[self.st.nowState][0] == self._listSetting[self.st.nowState][0]:
+            self._initDisplay(self.st.nowState)
+        #タイマー値更新
+        if self._listNowVal[self.st.nowState][0] > 1:
+            self._updateNowVal(self.st.nowState)
+        #タイムアウトで状態更新
+        elif self._listNowVal[self.st.nowState][0] == 1:
+            self._updateValAtTimeout(self.st.nowState)
+            self.st.updateState(None)
+        
+            #次の状態のタイマーの値を初期化
+            self._initialNextStateVal(self.st.nowState)
+            
+            self._processTransitionChk()
+
+    def eventClose(self):
+        self._event.set()
+        self._t.join()
+        print("close Now")
+        self.root.destroy()
 
     def updateTimer(self):
         # while not self._threadFinFlag:
@@ -109,72 +131,10 @@ class Timer:
                 #設定
                 self._set_values()
 
-            elif self.st.nowState == self.st.STATE_FORCUS:
-                #設定状態から遷移後の処理
-                if self.st.oldState == self.st.STATE_SETTING:
-                    self._listNowVal[self.st.nowState][0] = self._listSetting[self.st.nowState][0]
-                    #一度のみ、設定→特定条件への変化を検出させるため。
-                    self.st.forceSetOldState(self.st.nowState)
-                #表示初期化
-                #HACK: enFocusにforcuSettingを表示させる処理はタイマー値更新と被る。可能なら修正。但し、単純にelifにするとforcusSettingに1を設定した時に上手くいかなくなる。
-                if self._listNowVal[self.st.nowState][0] == self._forcusSetting[0]:
-                    self._initDisplay(self.st.nowState)
-                #タイマー値更新
-                if self._listNowVal[self.st.nowState][0] > 1:
-                    self._updateNowVal(self.st.nowState)
-                #タイムアウトで状態更新
-                elif self._listNowVal[self.st.nowState][0] == 1:
-                    self._updateValAtTimeout(self.st.nowState)
-                    self.st.updateState(None)
-                
-                    #次の状態のタイマーの値を初期化
-                    self._initialNextStateVal(self.st.nowState)
-                    
-                    self._processTransitionChk()
-
-            elif self.st.nowState == self.st.STATE_SHORT_REST:
-                #設定状態から遷移後の処理
-                if self.st.oldState == self.st.STATE_SETTING:
-                    self._listNowVal[self.st.nowState][0] = self._listSetting[self.st.nowState][0]
-                    #一度のみ、設定→特定条件への変化を検出させるため。
-                    self.st.forceSetOldState(self.st.nowState)
-                #表示初期化
-                if self._listNowVal[self.st.nowState][0] == self._shortRestSetting[0]:
-                    self._initDisplay(self.st.nowState)
-                #タイマー値更新
-                if self._listNowVal[self.st.nowState][0] > 1:
-                    self._updateNowVal(self.st.nowState)
-                #タイムアウトで状態更新
-                elif self._listNowVal[self.st.nowState][0] == 1:
-                    self._updateValAtTimeout(self.st.nowState)
-                    self.st.updateState(None)
-                
-                    #次の状態のタイマーの値を初期化
-                    self._initialNextStateVal(self.st.nowState)
-                    
-                    self._processTransitionChk()
-
-            elif self.st.nowState == self.st.STATE_LONG_REST:
-                #設定状態から遷移後の処理
-                if self.st.oldState == self.st.STATE_SETTING:
-                    self._listNowVal[self.st.nowState][0] = self._listSetting[self.st.nowState][0]
-                    #一度のみ、設定→特定条件への変化を検出させるため。
-                    self.st.forceSetOldState(self.st.nowState)
-                #表示初期化
-                if self._listNowVal[self.st.nowState][0] == self._longRestSetting[0]:
-                    self._initDisplay(self.st.nowState)
-                #タイマー値更新
-                if self._listNowVal[self.st.nowState][0] > 1:
-                    self._updateNowVal(self.st.nowState)
-                #タイムアウトで状態更新
-                elif self._listNowVal[self.st.nowState][0] == 1:
-                    self._updateValAtTimeout(self.st.nowState)
-                    self.st.updateState(None)
-                
-                    #次の状態のタイマーの値を初期化
-                    self._initialNextStateVal(self.st.nowState)
-                    
-                    self._processTransitionChk()
+            elif self.st.nowState == self.st.STATE_FORCUS or\
+                 self.st.nowState == self.st.STATE_SHORT_REST or\
+                 self.st.nowState == self.st.STATE_LONG_REST:
+                self._manageTimerAndGui()
 
             time.sleep(1)
 a = Timer()
